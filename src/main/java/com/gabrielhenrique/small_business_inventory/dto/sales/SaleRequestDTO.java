@@ -1,0 +1,16 @@
+package com.gabrielhenrique.small_business_inventory.dto.sales;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class SaleRequestDTO {
+    private List<SaleItemRequestDTO> items;
+}

@@ -6,30 +6,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "category")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class SaleItem {
-
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column
-    private Integer quantity;
-    @Column
-    private BigDecimal priceAtTime;
+    private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    @ManyToOne
-    @JoinColumn(name = "sale_id")
-    private Sale sale;
-    
+    @OneToMany(mappedBy = "category")
+    private List<Product> products = new ArrayList<>();
 }
