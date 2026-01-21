@@ -9,7 +9,7 @@ import com.gabrielhenrique.small_business_inventory.model.User;
 import com.gabrielhenrique.small_business_inventory.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -21,7 +21,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     @Autowired
     private UserConverter userConverter;
 
@@ -31,6 +31,11 @@ public class UserService {
 
     public UserResponseDTO findById(Long id) {
         User user = findEntityById(id);
+        return userConverter.toResponseDTO(user);
+    }
+
+    public UserResponseDTO findByEmail(String email) {
+        User user = findEntityByEmail(email);
         return userConverter.toResponseDTO(user);
     }
 

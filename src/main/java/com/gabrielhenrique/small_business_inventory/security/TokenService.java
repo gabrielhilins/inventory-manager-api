@@ -6,6 +6,8 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.gabrielhenrique.small_business_inventory.exception.InvalidTokenException;
 import com.gabrielhenrique.small_business_inventory.model.User;
+import com.gabrielhenrique.small_business_inventory.repository.TokenBlacklistRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,9 @@ public class TokenService {
     @Value("${api.security.token.expiration-hours}")
     private long expirationHours;
 
+    @Autowired
+    private TokenBlacklistRepository tokenBlacklistRepository;
+
     public String generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -40,6 +45,9 @@ public class TokenService {
     }
 
     public String validateToken(String token) {
+        if (tokenBlacklistRepository.findByToken(token).isPresent()) {
+            throw new InvalidTokenException("Token has been invalidated.", null);
+        }
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
