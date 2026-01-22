@@ -21,10 +21,13 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Authentication", description = "Endpoints for user authentication and registration")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
-    @Autowired
-    private UserService userService;
+    private final AuthService authService;
+    private final UserService userService;
+
+    public AuthController(AuthService authService, UserService userService) {
+        this.authService = authService;
+        this.userService = userService;
+    }
 
     @Operation(summary = "Register a new user", description = "Creates a new user account.")
     @ApiResponses(value = {

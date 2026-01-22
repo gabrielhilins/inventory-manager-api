@@ -1,5 +1,6 @@
 package com.gabrielhenrique.small_business_inventory.dto.login;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,8 +11,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequestDTO {
+    @NotBlank
     private String name;
+    @NotBlank
     private String email;
+    @NotBlank
     private String password;
+    @NotBlank
     private String role;
 }

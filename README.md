@@ -2,126 +2,160 @@
 
 A robust RESTful API for a small business inventory management system, built with Spring Boot. This API provides functionalities for managing products, categories, sales, stock, and users with role-based access control.
 
-## Key Features
-
-- **Authentication:** Secure JWT-based authentication for accessing endpoints.
-- **Role-Based Access Control:** Differentiated access levels for `ADMIN` and `USER` roles.
-- **Product Management:** Full CRUD (Create, Read, Update, Delete) operations for products.
-- **Category Management:** Full CRUD operations for product categories.
-- **User Management:** CRUD operations for managing users (Admin-only).
-- **Sales Processing:** Endpoint for processing sales, which automatically updates product stock.
-- **Stock Auditing:** Automatically logs all stock movements (e.g., sales, manual adjustments).
-- **Low Stock Alerts:** An endpoint to fetch all products that have fallen below their minimum stock level.
-
 ## Technologies & Dependencies
 
 - **Java 21:** Core programming language.
-- **Spring Boot 3.5.5:** Main application framework.
+- **Spring Boot 3.2.0:** Main application framework.
 - **Spring Security:** For authentication and authorization.
 - **Spring Data JPA:** For data persistence and repository management.
 - **PostgreSQL:** Production-ready relational database.
-- **Lombok:** To reduce boilerplate code (getters, setters, constructors).
-- **Java JWT (auth0):** For generating and validating JSON Web Tokens.
+- **H2 Database:** For local development and testing.
+- **Lombok:** To reduce boilerplate code.
+- **Java JWT:** For generating and validating JSON Web Tokens.
 - **Maven:** For project build and dependency management.
-- **JUnit 5 & Mockito:** For unit and integration testing.
+- **Docker:** For containerization.
 
-## Architecture Overview
+## Features
 
-The API follows a classic layered architecture pattern to ensure a clean separation of concerns, making it scalable and maintainable.
+- **Authentication:** Secure JWT-based authentication (`/login`, `/register`, `/logout`).
+- **Role-Based Access Control:** Differentiated access for `ADMIN` and `USER` roles.
+- **Product Management:** Full CRUD for products.
+- **Category Management:** Full CRUD for product categories.
+- **User Management:** CRUD for users (Admin-only).
+- **Sales Processing:** Endpoint for processing sales, which automatically updates product stock.
+- **Stock Auditing:** Logs all stock movements and provides history per product.
+- **Containerization:** A multi-stage `Dockerfile` is provided for building a lightweight, production-ready image.
 
-- **`controller`**: Handles incoming HTTP requests, validates request data, and serializes responses. It is the entry point to the API.
-- **`service`**: Contains the core business logic. It orchestrates calls between repositories and other services to fulfill a request.
-- **`repository`**: The data access layer, responsible for all communication with the database. It uses Spring Data JPA interfaces.
-- **`model`**: Contains the JPA entity classes that map to database tables.
-- **`dto` (Data Transfer Object)**: Defines objects used to transfer data between the client and the server, decoupling the API's public contract from the internal database structure.
-- **`converters`**: Utility classes responsible for converting between DTOs and JPA entities.
-- **`security`**: Manages authentication and authorization, including JWT generation, validation, and the security filter chain.
-- **`exception`**: Implements a global exception handler to provide consistent and clear error responses.
-
-## Package Structure
-
-```
-com.gabrielhenrique.small_business_inventory
-│
-├── config          # Spring Security and other bean configurations.
-├── controller      # REST API controllers for each entity.
-├── converters      # DTO-to-Entity and Entity-to-DTO converters.
-├── dto             # Data Transfer Objects for API requests and responses.
-├── exception       # Global and custom exception classes.
-├── model           # JPA entities and enums.
-├── repository      # Spring Data JPA repositories.
-├── security        # JWT token service and security filter.
-└── service         # Business logic layer for each entity.
-```
-
-## Local Setup and Configuration
-
-### Prerequisites
+## Prerequisites
 
 - Java 21 (or higher)
 - Maven 3.6 (or higher)
-- A running PostgreSQL instance
+- Docker (optional, for containerized execution)
 
-### 1. Clone the Repository
+## Running the Application
 
-```bash
-git clone https://github.com/your-username/inventory-manager-api.git
-cd inventory-manager-api
+### Local Development (with H2)
+
+By default, the application is configured to run with the H2 in-memory database. This is ideal for quick local testing without any external setup.
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone <your-repo-url>
+    cd inventory-manager-api
+    ```
+
+2.  **Set Environment Variables:**
+    The application requires a few environment variables to run, even for H2.
+
+    ```sh
+    # A strong, base64-encoded secret for signing JWTs
+    export API_SECURITY_TOKEN_SECRET="your_super_secret_key_here"
+    export API_SECURITY_TOKEN_ISSUER="my-app"
+    export API_SECURITY_TOKEN_EXPIRATION_HOURS=2
+
+    # Default admin user to be created on startup
+    export ADMIN_USER_NAME="admin"
+    export ADMIN_USER_EMAIL="admin@example.com"
+    export ADMIN_USER_PASSWORD="admin_password"
+    ```
+
+3.  **Run the Application:**
+    ```bash
+    ./mvnw spring-boot:run
+    ```
+    The API will be available at `http://localhost:8080`.
+    You can access the H2 console at `http://localhost:8080/h2-console` and use the default JDBC URL `jdbc:h2:mem:testdb`.
+
+### Production Mode (with PostgreSQL)
+
+To run the application with a PostgreSQL database, you must provide the database connection details via environment variables.
+
+```sh
+# Set the active profile to 'prod'
+export SPRING_PROFILES_ACTIVE=prod
+
+# PostgreSQL Connection Details
+export SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:5432/inventory_db"
+export SPRING_DATASOURCE_USERNAME="your_postgres_user"
+export SPRING_DATASOURCE_PASSWORD="your_postgres_password"
+
+# Plus all the variables from the local development section
+export API_SECURITY_TOKEN_SECRET="..."
+# ...and so on
 ```
-
-### 2. Configure the Application
-
-Open the `src/main/resources/application.properties` file and update the following properties to match your local environment:
-
-```properties
-# Database Configuration
-spring.datasource.url=jdbc:postgresql://localhost:5432/your_database
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-
-# JWT Secret (replace with a strong, base64-encoded secret)
-api.security.token.secret=your_jwt_secret_here
-```
-
-### 3. Run the Application
-
-You can run the API using the Maven wrapper included in the project:
-
+Then, run the application as before:
 ```bash
-# On Windows
-./mvnw.cmd spring-boot:run
-
-# On macOS/Linux
 ./mvnw spring-boot:run
 ```
 
-The API will be available at `http://localhost:8080`.
+## Running with Docker
+
+The project includes a multi-stage `Dockerfile` to create a lean and efficient container.
+
+1.  **Build the Docker Image:**
+    ```bash
+    docker build -t inventory-manager-api .
+    ```
+
+2.  **Run the Container:**
+    You can run the container using either the default H2 database or by connecting it to a PostgreSQL database.
+
+    **Option A: Run with H2 (for testing)**
+    ```bash
+    docker run -p 8080:8080 \
+      -e API_SECURITY_TOKEN_SECRET="your_super_secret_key_here" \
+      -e API_SECURITY_TOKEN_ISSUER="my-app" \
+      -e API_SECURITY_TOKEN_EXPIRATION_HOURS=2 \
+      -e ADMIN_USER_NAME="admin" \
+      -e ADMIN_USER_EMAIL="admin@example.com" \
+      -e ADMIN_USER_PASSWORD="admin_password" \
+      inventory-manager-api
+    ```
+
+    **Option B: Run with PostgreSQL**
+    ```bash
+    docker run -p 8080:8080 \
+      -e SPRING_PROFILES_ACTIVE="prod" \
+      -e SPRING_DATASOURCE_URL="jdbc:postgresql://your-db-host:5432/inventory_db" \
+      -e SPRING_DATASOURCE_USERNAME="your_postgres_user" \
+      -e SPRING_DATASOURCE_PASSWORD="your_postgres_password" \
+      -e API_SECURITY_TOKEN_SECRET="your_super_secret_key_here" \
+      -e API_SECURITY_TOKEN_ISSUER="my-app" \
+      -e API_SECURITY_TOKEN_EXPIRATION_HOURS=2 \
+      -e ADMIN_USER_NAME="admin" \
+      -e ADMIN_USER_EMAIL="admin@example.com" \
+      -e ADMIN_USER_PASSWORD="admin_password" \
+      inventory-manager-api
+    ```
 
 ## API Endpoints
 
 All endpoints are prefixed with `/api`.
 
-| Endpoint                                  | Method | Description                                 | Access       |
-| ----------------------------------------- | ------ | ------------------------------------------- | ------------ |
-| `/auth/register`                          | `POST` | Register a new user.                        | Public       |
-| `/auth/login`                             | `POST` | Authenticate and receive a JWT.             | Public       |
-| `/categories`                             | `GET`  | Get all categories.                         | Authenticated |
-| `/categories/{id}`                        | `GET`  | Get a single category by ID.                | Authenticated |
-| `/categories`                             | `POST` | Create a new category.                      | Admin        |
-| `/categories/{id}`                        | `PUT`  | Update an existing category.                | Admin        |
-| `/categories/{id}`                        | `DELETE`| Delete a category.                          | Admin        |
-| `/products`                               | `GET`  | Get all products.                           | Authenticated |
-| `/products/{id}`                          | `GET`  | Get a single product by ID.                 | Authenticated |
-| `/products/alerts`                        | `GET`  | Get products with low stock.                | Authenticated |
-| `/products`                               | `POST` | Create a new product.                       | Admin        |
-| `/products/{id}`                          | `PUT`  | Update an existing product.                 | Admin        |
-| `/products/{id}`                          | `DELETE`| Delete a product.                           | Admin        |
-| `/sales`                                  | `POST` | Process a new sale.                         | Authenticated |
-| `/sales`                                  | `GET`  | Get a history of all sales.                 | Authenticated |
-| `/users`                                  | `GET`  | Get all users.                              | Admin        |
-| `/users/{id}`                             | `GET`  | Get a single user by ID.                    | Admin        |
-| `/users/{id}`                             | `PUT`  | Update an existing user.                    | Admin        |
-| `/users/{id}`                             | `DELETE`| Delete a user.                              | Admin        |
-| `/stock-movements`                        | `GET`  | Get a history of all stock movements.       | Authenticated |
+| Endpoint | Method | Description | Access |
+|---|---|---|---|
+| `/health` | `GET` | Health check. | Public |
+| `/auth/register` | `POST` | Register a new user. | Public |
+| `/auth/login` | `POST` | Authenticate and receive a JWT. | Public |
+| `/auth/logout` | `POST` | Invalidate the current JWT. | Authenticated |
+| `/users/me` | `GET` | Get current user's info. | Authenticated |
+| `/users` | `GET` | Get all users. | Admin |
+| `/users/{id}` | `GET` | Get a single user by ID. | Admin |
+| `/users/{id}` | `PUT` | Update a user. | Admin |
+| `/users/{id}` | `DELETE` | Delete a user. | Admin |
+| `/categories` | `GET` | Get all categories. | Public |
+| `/categories/{id}` | `GET` | Get a single category by ID. | Public |
+| `/categories` | `POST` | Create a new category. | Admin |
+| `/categories/{id}` | `PUT` | Update a category. | Admin |
+| `/categories/{id}`| `DELETE`| Delete a category. | Admin |
+| `/products` | `GET` | Get all products. | Public |
+| `/products/{id}` | `GET` | Get a single product by ID. | Public |
+| `/products/alerts` | `GET` | Get products with low stock. | Public |
+| `/products` | `POST` | Create a new product. | Admin |
+| `/products/{id}` | `PUT` | Update a product. | Admin |
+| `/products/{id}` | `DELETE`| Delete a product. | Admin |
+| `/sales` | `POST` | Process a new sale. | Authenticated |
+| `/sales` | `GET` | Get a history of all sales. | Authenticated |
+| `/stock/history/{productId}` | `GET` | Get stock history for a product. | Authenticated |
 
 ```

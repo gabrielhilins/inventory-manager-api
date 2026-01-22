@@ -5,6 +5,7 @@ import com.gabrielhenrique.small_business_inventory.dto.login.TokenResponseDTO;
 import com.gabrielhenrique.small_business_inventory.dto.user.UserResponseDTO;
 import com.gabrielhenrique.small_business_inventory.model.Enum.Role;
 import com.gabrielhenrique.small_business_inventory.model.User;
+import com.gabrielhenrique.small_business_inventory.security.UserDetailsImpl;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,12 +23,12 @@ public class UserConverter {
         return user;
     }
 
-    public TokenResponseDTO toTokenDTO(User user, String token) {
+    public TokenResponseDTO toTokenDTO(UserDetailsImpl userDetails, String token) {
         TokenResponseDTO dto = new TokenResponseDTO();
         dto.setToken(token);
         dto.setType("Bearer");
-        dto.setEmail(user.getEmail());
-        dto.setRole(user.getRole().name());
+        dto.setEmail(userDetails.getEmail());
+        dto.setRole(userDetails.getRole().name());
         return dto;
     }
 

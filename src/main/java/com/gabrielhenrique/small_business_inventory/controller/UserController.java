@@ -20,8 +20,11 @@ import java.util.List;
 @Tag(name = "Users", description = "Endpoints for managing users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")

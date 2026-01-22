@@ -27,16 +27,19 @@ public class TokenService {
     @Value("${api.security.token.expiration-hours}")
     private long expirationHours;
 
-    @Autowired
-    private TokenBlacklistRepository tokenBlacklistRepository;
+    private final TokenBlacklistRepository tokenBlacklistRepository;
 
-    public String generateToken(User user) {
+    public TokenService(TokenBlacklistRepository tokenBlacklistRepository) {
+        this.tokenBlacklistRepository = tokenBlacklistRepository;
+    }
+
+    public String generateToken(UserDetailsImpl userDetails) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
                     .withIssuer(issuer)
-                    .withSubject(user.getEmail())
-                    .withClaim("role", user.getRole().name())
+                    .withSubject(userDetails.getEmail())
+                    .withClaim("role", userDetails.getRole().name())
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {

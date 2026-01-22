@@ -20,8 +20,11 @@ import java.util.List;
 @Tag(name = "Stock", description = "Endpoints for managing stock")
 public class StockMovementController {
 
-    @Autowired
-    private StockMovementService stockService;
+    private final StockMovementService stockService;
+
+    public StockMovementController(StockMovementService stockService) {
+        this.stockService = stockService;
+    }
 
     @GetMapping("/history/{productId}")
     @PreAuthorize("isAuthenticated()")

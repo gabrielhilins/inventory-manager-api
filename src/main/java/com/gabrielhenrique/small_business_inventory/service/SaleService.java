@@ -22,14 +22,17 @@ import java.util.stream.Collectors;
 @Service
 public class SaleService {
 
-    @Autowired
-    private SaleRepository saleRepository;
-    @Autowired
-    private ProductService productService;
-    @Autowired
-    private StockMovementService stockService;
-    @Autowired
-    private SaleConverter saleConverter;
+    private final SaleRepository saleRepository;
+    private final ProductService productService;
+    private final StockMovementService stockService;
+    private final SaleConverter saleConverter;
+
+    public SaleService(SaleRepository saleRepository, ProductService productService, StockMovementService stockService, SaleConverter saleConverter) {
+        this.saleRepository = saleRepository;
+        this.productService = productService;
+        this.stockService = stockService;
+        this.saleConverter = saleConverter;
+    }
 
     @Transactional
     public SaleResponseDTO processSale(SaleRequestDTO dto, User seller) {

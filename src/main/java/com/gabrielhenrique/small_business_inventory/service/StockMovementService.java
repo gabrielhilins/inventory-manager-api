@@ -18,10 +18,13 @@ import java.util.stream.Collectors;
 @Service
 public class StockMovementService {
 
-    @Autowired
-    private StockMovementRepository movementRepository;
-    @Autowired
-    private StockMovementConverter movementConverter;
+    private final StockMovementRepository movementRepository;
+    private final StockMovementConverter movementConverter;
+
+    public StockMovementService(StockMovementRepository movementRepository, StockMovementConverter movementConverter) {
+        this.movementRepository = movementRepository;
+        this.movementConverter = movementConverter;
+    }
 
     @Transactional
     public void log(Product product, Integer amount, MovementType type, String reason, User user) {

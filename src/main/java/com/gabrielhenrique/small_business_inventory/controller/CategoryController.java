@@ -19,8 +19,11 @@ import java.util.List;
 @Tag(name = "Categories", description = "Endpoints for managing categories")
 public class CategoryController {
 
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
+
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     @GetMapping
     @Operation(summary = "Get all categories", description = "Returns a list of all product categories.")

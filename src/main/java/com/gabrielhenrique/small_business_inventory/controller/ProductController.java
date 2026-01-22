@@ -20,8 +20,11 @@ import java.util.List;
 @Tag(name = "Products", description = "Endpoints for managing products")
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     @GetMapping
     @Operation(summary = "Get all products", description = "Returns a list of all products.")

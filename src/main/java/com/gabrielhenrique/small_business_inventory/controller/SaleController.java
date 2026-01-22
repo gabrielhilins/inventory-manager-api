@@ -22,8 +22,11 @@ import java.util.List;
 @Tag(name = "Sales", description = "Endpoints for managing sales")
 public class SaleController {
 
-    @Autowired
-    private SaleService saleService;
+    private final SaleService saleService;
+
+    public SaleController(SaleService saleService) {
+        this.saleService = saleService;
+    }
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")

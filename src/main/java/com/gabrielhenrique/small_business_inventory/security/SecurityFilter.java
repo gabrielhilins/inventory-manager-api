@@ -18,10 +18,13 @@ import java.io.IOException;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private TokenService tokenService;
-    @Autowired
-    private UserRepository userRepository;
+    private final TokenService tokenService;
+    private final CustomUserDetailsService userDetailsService;
+
+    public SecurityFilter(TokenService tokenService, CustomUserDetailsService userDetailsService) {
+        this.tokenService = tokenService;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -31,8 +34,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         if (token != null) {
             var email = tokenService.validateToken(token);
-            UserDetails user = (UserDetails) userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            UserDetails user = userDetailsService.loadUserByUsername(email);
 
             // Autentica o usuário no contexto do Spring Security
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());

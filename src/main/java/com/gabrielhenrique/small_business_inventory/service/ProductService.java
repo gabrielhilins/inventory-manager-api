@@ -19,12 +19,15 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private ProductConverter productConverter;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductConverter productConverter;
+
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, ProductConverter productConverter) {
+        this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+        this.productConverter = productConverter;
+    }
 
     public List<ProductResponseDTO> findAll() {
         return productRepository.findAll().stream()
